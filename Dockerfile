@@ -111,9 +111,6 @@ COPY --from=build /usr/src/app/packages ./packages
 # Copy custom pieces for DEV_PIECES loading
 COPY --from=build /usr/src/app/dist/packages/pieces/community/brightyard/ ./dist/packages/pieces/community/brightyard/
 
-# Copy root node_modules so custom pieces can resolve their dependencies
-COPY --from=build /usr/src/app/node_modules ./node_modules
-
 # Copy frontend files to Nginx document root
 COPY --from=build /usr/src/app/dist/packages/react-ui /usr/share/nginx/html/
 

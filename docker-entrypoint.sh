@@ -4,6 +4,9 @@
 export AP_APP_TITLE="${AP_APP_TITLE:-Activepieces}"
 export AP_FAVICON_URL="${AP_FAVICON_URL:-https://cdn.activepieces.com/brand/favicon.ico}"
 
+# Set NODE_PATH so custom pieces (DEV_PIECES) can resolve dependencies from server's node_modules
+export NODE_PATH="/usr/src/app/dist/packages/server/api/node_modules"
+
 # Debug: Print environment variables
 echo "AP_APP_TITLE: $AP_APP_TITLE"
 echo "AP_FAVICON_URL: $AP_FAVICON_URL"
