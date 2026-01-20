@@ -69,8 +69,8 @@ RUN --mount=type=cache,target=/root/.bun/install/cache \
 # Copy source code after dependency installation
 COPY . .
 
-# Build both projects (already has NX_NO_CLOUD from base stage)
-RUN npx nx run-many --target=build --projects=react-ui,server-api --configuration production --parallel=2 --skip-nx-cache
+# Build UI, server, and custom pieces (already has NX_NO_CLOUD from base stage)
+RUN npx nx run-many --target=build --projects=react-ui,server-api,pieces-brightyard --configuration production --parallel=2 --skip-nx-cache
 
 # Install production dependencies only for the backend API
 RUN --mount=type=cache,target=/root/.bun/install/cache \
@@ -97,7 +97,8 @@ COPY docker-entrypoint.sh .
 RUN mkdir -p \
     /usr/src/app/dist/packages/server \
     /usr/src/app/dist/packages/engine \
-    /usr/src/app/dist/packages/shared && \
+    /usr/src/app/dist/packages/shared \
+    /usr/src/app/dist/packages/pieces/community && \
     chmod +x docker-entrypoint.sh
 
 # Copy built artifacts from build stage
@@ -106,6 +107,9 @@ COPY --from=build /usr/src/app/dist/packages/engine/ ./dist/packages/engine/
 COPY --from=build /usr/src/app/dist/packages/server/ ./dist/packages/server/
 COPY --from=build /usr/src/app/dist/packages/shared/ ./dist/packages/shared/
 COPY --from=build /usr/src/app/packages ./packages
+
+# Copy custom pieces for DEV_PIECES loading
+COPY --from=build /usr/src/app/dist/packages/pieces/community/brightyard/ ./dist/packages/pieces/community/brightyard/
 
 # Copy frontend files to Nginx document root
 COPY --from=build /usr/src/app/dist/packages/react-ui /usr/share/nginx/html/
