@@ -106,10 +106,15 @@ COPY --from=build /usr/src/app/LICENSE .
 COPY --from=build /usr/src/app/dist/packages/engine/ ./dist/packages/engine/
 COPY --from=build /usr/src/app/dist/packages/server/ ./dist/packages/server/
 COPY --from=build /usr/src/app/dist/packages/shared/ ./dist/packages/shared/
-COPY --from=build /usr/src/app/packages ./packages
 
 # Copy custom pieces for DEV_PIECES loading
+# Only copy the dist (built) pieces, not source. Source triggers NX rebuild which fails at runtime.
 COPY --from=build /usr/src/app/dist/packages/pieces/community/brightyard/ ./dist/packages/pieces/community/brightyard/
+
+# Copy minimal source structure for dev-pieces-installer dependency detection
+# Only package.json is needed - no source files that would trigger watch/rebuild
+RUN mkdir -p /usr/src/app/packages/pieces/community/brightyard
+COPY --from=build /usr/src/app/packages/pieces/community/brightyard/package.json ./packages/pieces/community/brightyard/
 
 # Create symlink for node_modules so custom pieces can resolve dependencies
 # The piece at dist/packages/pieces/community/brightyard needs to resolve @activepieces/pieces-framework
