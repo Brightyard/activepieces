@@ -70,7 +70,8 @@ RUN --mount=type=cache,target=/root/.bun/install/cache \
 COPY . .
 
 # Build UI, server, and custom pieces (already has NX_NO_CLOUD from base stage)
-RUN npx nx run-many --target=build --projects=react-ui,server-api,pieces-brightyard --configuration production --parallel=2 --skip-nx-cache
+# Include pieces-framework and pieces-common for runtime linking
+RUN npx nx run-many --target=build --projects=react-ui,server-api,pieces-framework,pieces-common,pieces-brightyard --configuration production --parallel=2 --skip-nx-cache
 
 # Install production dependencies only for the backend API
 RUN --mount=type=cache,target=/root/.bun/install/cache \
@@ -110,6 +111,10 @@ COPY --from=build /usr/src/app/dist/packages/shared/ ./dist/packages/shared/
 # Copy custom pieces for DEV_PIECES loading
 # Only copy the dist (built) pieces, not source. Source triggers NX rebuild which fails at runtime.
 COPY --from=build /usr/src/app/dist/packages/pieces/community/brightyard/ ./dist/packages/pieces/community/brightyard/
+
+# Copy shared pieces packages needed for piece linking at runtime
+COPY --from=build /usr/src/app/dist/packages/pieces/community/framework/ ./dist/packages/pieces/community/framework/
+COPY --from=build /usr/src/app/dist/packages/pieces/community/common/ ./dist/packages/pieces/community/common/
 
 # Copy minimal source structure for dev-pieces-installer dependency detection
 # Only package.json is needed - no source files that would trigger watch/rebuild
